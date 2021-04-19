@@ -3,6 +3,7 @@ const cors =require('cors');
 
 const app =express();
 
+const db =require("./db");
 var corsOptions = {
     orgin: ["http://localhost:4200", "http://localhost:8000"]
 }
@@ -18,5 +19,5 @@ app.get("/",function(req,res){
     res.send("Hello node js :)");
 });
 
-require("./article.js")(app);
+require("./article.js")(app, db);
 

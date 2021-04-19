@@ -1,11 +1,14 @@
-const ARTICLES = require("./mock-articles");
 
-module.exports = function(app) {
+module.exports = function(app , db) {
     app.get("/articles" , function(req,res){
-        res.send(ARTICLES);
+        db.getArticles(function(Articles){
+            res.send(Articles);
+        })
     });
 
     app.get("/articles/:key",function(req,res){
-        res.send(ARTICLES.filter(article => article.key  === req.params.key)[0]);
+        db.getArticleByKey({key: req.params.key},function(Article){
+            res.send(Article);
+        })
     })
 };
