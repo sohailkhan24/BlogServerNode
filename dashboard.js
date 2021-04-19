@@ -19,5 +19,22 @@ module.exports =function(app,db){
         sql.updateArticle(req.body, function(result) {
           res.send(result);
         });
+    });
+
+
+    app.delete("/dashboard/article/:id",  function(req,res) {
+        db.deleteArticle(req.params.id, result => {
+          if (result != null) {
+            res.send(result);
+          } else {
+            res.status(400).send({ message: "Article could not be deleted!" });
+          }
+        });
+    });
+    
+    app.post("/dashboard/article", function(req, res) {
+        sql.createArticle(req.body, function(result) {
+          res.send(result);
+        });
       });
 }
