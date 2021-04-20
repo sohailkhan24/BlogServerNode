@@ -17,11 +17,12 @@ app.listen(8000, () => {
 
 
 app.get("/",function(req,res){
-    res.send("Hello node js :)");
+    res.send("Api running :)");
 });
 
 require("./article.js")(app, db);
 require("./dashboard.js")(app,db);
+require("./auth.js")(app,db);
 
 
 

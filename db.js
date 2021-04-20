@@ -1,5 +1,6 @@
 const { text } = require('body-parser');
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 mongoose.connect(`mongodb://localhost/blogangular`);
 
 const db = mongoose.connection;
@@ -21,13 +22,11 @@ const userSchema = new mongoose.Schema({
         required:true,
 
     },
-    salt:{
-        type: String,
+    salt: {
+        type:  String,
         required:true,
-
-    },
-  
-  
+    }
+    
 
 })
 const articleSchema = new mongoose.Schema({
@@ -74,20 +73,7 @@ const articleSchema = new mongoose.Schema({
 
 const Article = mongoose.model('Article', articleSchema);
 const User = mongoose.model('User', userSchema);
-User.create({
-    name:'Sohail',
-    password:'abc'
-})
-// Article.create({
-//     title: 'My first Article',
-//    content: '<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>',
-//    description: 'This is my first article',
-//    key: 'my-first-article',
-//    date: new Date(),
-//    imageUrl: 'https://getwallpapers.com/wallpaper/full/e/b/8/1526301.jpg',
-//    viewCount: 0,
-//    published:true
-// });
+
 
 
 
@@ -98,7 +84,7 @@ getArticles = function(callback){
 getArticleByKey = function(options,callback){
     Article.findOne({key:options.key,published:true}).then(article => {
         // if(article != null){
-        //         article.update({viewCount: viewCount+1} )
+        //         article.update({viewCount: ++article.viewCount} )
         //     }
         //     console.log(article.viewCount);
     callback(article)});
@@ -160,6 +146,30 @@ deleteArticle = function(id, callback) {
     }).then(article => callback(article));
   };
 
+
+  addUser =function(user, callback){
+      User.create({
+          name:user.name.toLowerCase(),
+          password:user.password,
+          salt:user.salt,
+      }).then(callback(true));
+  }
+
+  login = function(req,callback){
+      User.findOne({name:req.name}).then(function(user){
+          if(user!= null){
+            
+            var userpassword =crypto.pbkdf2Sync(req.password,user.salt,1000,64,"sha512").toString("hex");
+            if(userpassword === user.password){
+                callback(true);
+                return;
+            }
+          }
+          callback(false);
+      });
+  };
+
+
 module.exports = db;
 module.exports.getArticles = getArticles;
 module.exports.getArticleByKey  = getArticleByKey;
@@ -169,3 +179,5 @@ module.exports.getDashboardArticleByKey = getDashboardArticleByKey;
 module.exports.updateArticle = updateArticle;
 module.exports.deleteArticle = deleteArticle;
 module.exports.createArticle = createArticle;
+module.exports.addUser = addUser;
+module.exports.login = login;
